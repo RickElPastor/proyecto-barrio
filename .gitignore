@@ -1,0 +1,26 @@
+# Entorno virtual
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de pruebas y herramientas
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Variables de entorno
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# Cursor / VS Code
+.vscode/
+.cursor/
+
+# Logs
+*.log
