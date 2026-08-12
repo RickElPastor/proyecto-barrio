@@ -22,6 +22,14 @@ class GameMap:
             pygame.Rect(270, 0, 80, height),
         ]
 
+        self.buildings = [
+            Building(100, 100, 140, 120, "house"),
+            Building(430, 100, 140, 120, "house"),
+            Building(750, 100, 180, 120, "shop"),
+            Building(100, 400, 140, 120, "house"),
+            Building(430, 400, 180, 120, "restaurant"),
+        ]
+
         self.locations = [
             Location(
                 "Zona residencial",
@@ -40,22 +48,18 @@ class GameMap:
                 180,
             ),
             Location(
-            "Zona comercial",
-            "commercial",
-            0,
-            450,
-            width,
-            height - 450,
+                "Zona comercial",
+                "commercial",
+                0,
+                450,
+                width,
+                height - 450,
             ),
         ]
 
-        self.buildings = [
-            Building(100, 100, 140, 120, "house"),
-            Building(430, 100, 140, 120, "house"),
-            Building(750, 100, 180, 120, "shop"),
-            Building(100, 400, 140, 120, "house"),
-            Building(430, 400, 180, 120, "restaurant"),
-        ]
+    def get_collision_obstacles(self):
+        """Devuelve los edificios que actúan como obstáculos."""
+        return self.buildings
 
     def draw(self, screen):
         """Dibuja el terreno, las calles y los edificios."""
