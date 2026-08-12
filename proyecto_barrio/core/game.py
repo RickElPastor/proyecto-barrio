@@ -12,6 +12,7 @@ from proyecto_barrio.config.settings import (
 )
 
 from proyecto_barrio.player.player import Player
+from proyecto_barrio.world.map import GameMap
 
 class Game:
     """Controla el ciclo de vida principal del juego."""
@@ -38,6 +39,11 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
 
+        self.game_map = GameMap(
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT,
+        )
+
         self.player = Player(
             WINDOW_WIDTH // 2 - 20,
             WINDOW_HEIGHT // 2 - 20,
@@ -59,12 +65,10 @@ class Game:
 
     def draw(self):
         """Dibuja el estado actual del juego."""
-        self.screen.fill((30, 30, 30))
+        self.game_map.draw(self.screen)
         self.player.draw(self.screen)
 
-        pygame.display.set_caption(
-            f"Proyecto Barrio - FPS: {self.clock.get_fps():.1f}"
-        )
+        pygame.display.set_caption(f"Proyecto Barrio - FPS: {self.clock.get_fps():.1f}")
 
         pygame.display.flip()
 
