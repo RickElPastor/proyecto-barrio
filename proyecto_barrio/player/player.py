@@ -91,6 +91,20 @@ class Player:
                 round(self.position.y),
             )
 
+    def get_nearby_npc(self, npcs, interaction_distance=70):
+        """Devuelve el NPC más cercano dentro del rango de interacción."""
+        closest_npc = None
+        closest_distance = float("inf")
+
+        for npc in npcs:
+            distance = self.position.distance_to(npc.position)
+
+            if distance <= interaction_distance and distance < closest_distance:
+                closest_npc = npc
+                closest_distance = distance
+
+        return closest_npc
+
     def draw(self, screen):
         """Dibuja temporalmente al jugador en pantalla."""
         pygame.draw.rect(

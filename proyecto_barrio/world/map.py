@@ -4,6 +4,7 @@ import pygame
 
 from proyecto_barrio.world.buildings import Building
 from proyecto_barrio.world.locations import Location
+from proyecto_barrio.world.npcs import NPC
 
 
 class GameMap:
@@ -28,6 +29,12 @@ class GameMap:
             Building(750, 100, 180, 120, "shop"),
             Building(100, 400, 140, 120, "house"),
             Building(430, 400, 180, 120, "restaurant"),
+        ]
+
+        self.npcs = [
+            NPC(200, 260, "Carlos"),
+            NPC(650, 260, "María"),
+            NPC(700, 500, "Luis"),
         ]
 
         self.locations = [
@@ -57,6 +64,10 @@ class GameMap:
             ),
         ]
 
+    def get_npcs(self):
+        """Devuelve los NPC del mapa."""
+        return self.npcs
+
     def get_collision_obstacles(self):
         """Devuelve los edificios que actúan como obstáculos."""
         return self.buildings
@@ -74,3 +85,6 @@ class GameMap:
 
         for building in self.buildings:
             building.draw(screen)
+
+        for npc in self.npcs:
+            npc.draw(screen)

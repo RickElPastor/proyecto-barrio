@@ -14,6 +14,7 @@ from proyecto_barrio.config.settings import (
 from proyecto_barrio.player.player import Player
 from proyecto_barrio.world.map import GameMap
 from proyecto_barrio.world.collision import CollisionManager
+from proyecto_barrio.ui.dialogs import DialogManager
 
 
 class Game:
@@ -46,6 +47,13 @@ class Game:
             WINDOW_HEIGHT,
         )
 
+        self.npcs = self.game_map.get_npcs()
+
+        self.interaction_open = False
+        self.interaction_npc = None
+
+        self.dialog_manager = DialogManager()
+
         self.collision_manager = CollisionManager(
             self.game_map.get_collision_obstacles()
         )
@@ -61,19 +69,66 @@ class Game:
             if event.type == pygame.QUIT:
                 self.running = False
 
+            if event.type == pygame.KEYDOWN:
+                if self.interaction_open:
+                    if event.key in (pygame.K_UP, pygame.K_w):
+                        self.dialog_manager.move_selection(-1)
+
+                    elif event.key in (pygame.K_DOWN, pygame.K_s):
+                        self.dialog_manager.move_selection(1)
+
+                    elif event.key == pygame.K_ESCAPE:
+                        self.interaction_open = False
+                        self.interaction_npc = None
+                        self.dialog_manager.reset()
+
+                    elif event.key == pygame.K_RETURN:
+                        selected_option = self.dialog_manager.options[
+                            self.dialog_manager.selected
+                        ]
+
+                        if selected_option == "Cancelar":
+                            self.interaction_open = False
+                            self.interaction_npc = None
+                            self.dialog_manager.reset()
+
+                else:
+                    if event.key == pygame.K_RETURN:
+                        nearby_npc = self.player.get_nearby_npc(
+                            self.npcs
+                        )
+
+                        if nearby_npc is not None:
+                            self.interaction_open = True
+                            self.interaction_npc = nearby_npc
+                            self.dialog_manager.reset()
+
     def update(self, delta_time):
         """Actualiza la lógica del juego."""
-        self.player.update(
-            delta_time,
-            WINDOW_WIDTH,
-            WINDOW_HEIGHT,
-            self.collision_manager,
-        )
+
+        if not self.interaction_open:
+            self.player.update(
+                delta_time,
+                WINDOW_WIDTH,
+                WINDOW_HEIGHT,
+                self.collision_manager,
+            )
 
     def draw(self):
         """Dibuja el estado actual del juego."""
         self.game_map.draw(self.screen)
         self.player.draw(self.screen)
+
+        nearby_npc = self.player.get_nearby_npc(self.npcs)
+
+        if nearby_npc is not None:
+            nearby_npc.draw_interaction_indicator(self.screen)
+
+        if self.interaction_open and self.interaction_npc is not None:
+            self.dialog_manager.draw(
+            self.screen,
+            self.interaction_npc,
+        )
 
         pygame.display.set_caption(f"Proyecto Barrio - FPS: {self.clock.get_fps():.1f}")
 
