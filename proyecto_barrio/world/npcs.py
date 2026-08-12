@@ -16,6 +16,11 @@ class NPC:
         self.name = name
         self.role = role
 
+        self.dialogue = [
+            f"Qué onda, soy {self.name}.",
+            "¿Qué tal tu día?",
+        ]
+
         self.rect = pygame.Rect(
             round(self.position.x),
             round(self.position.y),
@@ -30,9 +35,7 @@ class NPC:
         font = pygame.font.Font(None, 24)
 
         text = font.render("E", True, (255, 255, 255))
-        text_rect = text.get_rect(
-            center=(self.rect.centerx, self.rect.top - 12)
-        )
+        text_rect = text.get_rect(center=(self.rect.centerx, self.rect.top - 12))
 
         screen.blit(text, text_rect)
 
