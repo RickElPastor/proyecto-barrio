@@ -13,6 +13,8 @@ from proyecto_barrio.config.settings import (
 
 from proyecto_barrio.player.player import Player
 from proyecto_barrio.world.map import GameMap
+from proyecto_barrio.world.collision import CollisionManager
+
 
 class Game:
     """Controla el ciclo de vida principal del juego."""
@@ -44,6 +46,10 @@ class Game:
             WINDOW_HEIGHT,
         )
 
+        self.collision_manager = CollisionManager(
+            self.game_map.get_collision_obstacles()
+        )
+
         self.player = Player(
             WINDOW_WIDTH // 2 - 20,
             WINDOW_HEIGHT // 2 - 20,
@@ -61,6 +67,7 @@ class Game:
             delta_time,
             WINDOW_WIDTH,
             WINDOW_HEIGHT,
+            self.collision_manager,
         )
 
     def draw(self):

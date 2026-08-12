@@ -2,6 +2,7 @@
 
 import pygame
 
+
 class Player:
     """Representa al personaje controlado por el jugador."""
 
@@ -22,10 +23,9 @@ class Player:
             self.height,
         )
 
-    def update(self, delta_time, screen_width, screen_height):
+    def update(self, delta_time, screen_width, screen_height, collision_manager=None):
         """Actualiza el movimiento del jugador."""
         keys = pygame.key.get_pressed()
-
         direction = pygame.Vector2(0, 0)
 
         if keys[pygame.K_w]:
@@ -40,16 +40,40 @@ class Player:
         if keys[pygame.K_d]:
             direction.x += 1
 
-        if direction.length_squared() > 0:
-            direction = direction.normalize()
+        if direction.length_squared() == 0:
+            return
 
-            if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
-                speed = self.run_speed
-            else:
-                speed = self.walk_speed
+        direction = direction.normalize()
 
-            movement = direction * speed * delta_time
+        if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+            speed = self.run_speed
+        else:
+            speed = self.walk_speed
 
+        movement = direction * speed * delta_time
+
+        if collision_manager is not None:
+            collision_manager.move_with_collisions(
+                self.rect,
+                movement,
+            )
+
+            self.rect.x = max(
+                0,
+                min(self.rect.x, screen_width - self.width),
+            )
+
+            self.rect.y = max(
+                0,
+                min(self.rect.y, screen_height - self.height),
+            )
+
+            self.position.update(
+                self.rect.x,
+                self.rect.y,
+            )
+
+        else:
             self.position += movement
 
             self.position.x = max(
