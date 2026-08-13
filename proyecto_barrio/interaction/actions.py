@@ -38,6 +38,7 @@ class ActionManager:
         return {
             "action": "help",
             "returns_to_menu": True,
+            "message": f"{game.interaction_npc.name} te agradece la ayuda.",
         }
 
     def _steal(self, game):

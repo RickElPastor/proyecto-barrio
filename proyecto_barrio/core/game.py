@@ -78,18 +78,36 @@ class Game:
             # =========================
             # DIÁLOGO ACTIVO
             # =========================
+            if self.dialog_manager.active_message:
+                if event.key == pygame.K_RETURN:
+                    self.dialog_manager.close_message()
+
+                    self.interaction_open = True
+                    self.dialog_manager.reset()
+
+                elif event.key == pygame.K_ESCAPE:
+                    self.dialog_manager.close_message()
+
+                    self.interaction_open = True
+                    self.dialog_manager.reset()
+
+                continue
+
             if self.dialog_manager.active_dialogue:
                 if event.key == pygame.K_RETURN:
                     self.dialog_manager.advance_dialogue()
 
-                    if not self.dialog_manager.active_dialogue:
-                        self.interaction_open = True
-                        self.dialog_manager.reset()
+                if not self.dialog_manager.active_dialogue:
+                    self.interaction_open = True
+                    self.dialog_manager.reset()
 
                 elif event.key == pygame.K_ESCAPE:
                     self.dialog_manager.active_dialogue = False
                     self.dialog_manager.dialogue_lines = []
                     self.dialog_manager.dialogue_index = 0
+
+                    self.interaction_open = True
+                    self.dialog_manager.reset()
 
                 continue
 
@@ -121,6 +139,12 @@ class Game:
 
                         self.dialog_manager.start_dialogue(self.interaction_npc)
 
+                    if action["id"] == "help":
+                        self.interaction_open = False
+
+                        if result is not None:
+                            self.dialog_manager.show_message(result["message"])
+
                     elif action["id"] == "cancel":
                         self.interaction_open = False
                         self.interaction_npc = None
@@ -142,13 +166,21 @@ class Game:
     def update(self, delta_time):
         """Actualiza la lógica del juego."""
 
-        if not self.interaction_open:
-            self.player.update(
-                delta_time,
-                WINDOW_WIDTH,
-                WINDOW_HEIGHT,
-                self.collision_manager,
-            )
+        interaction_active = (
+            self.interaction_open
+            or self.dialog_manager.active_dialogue
+            or self.dialog_manager.active_message
+        )
+
+        if interaction_active:
+            return
+
+        self.player.update(
+            delta_time,
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT,
+            self.collision_manager,
+        )
 
     def draw(self):
         """Dibuja el estado actual del juego."""
@@ -170,6 +202,11 @@ class Game:
             self.dialog_manager.draw_dialogue(
                 self.screen,
                 self.interaction_npc,
+            )
+
+        if self.dialog_manager.active_message:
+            self.dialog_manager.draw_message(
+                self.screen,
             )
 
         pygame.display.set_caption(f"Proyecto Barrio - FPS: {self.clock.get_fps():.1f}")

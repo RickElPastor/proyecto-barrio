@@ -42,6 +42,16 @@ class DialogManager:
         self.dialogue_lines = []
         self.dialogue_index = 0
 
+        self.active_message = False
+        self.message_text = ""
+
+        self.interaction_box = pygame.Rect(
+            120,
+            500,
+            1040,
+            150,
+        )
+
     def reset(self):
         """Reinicia la selección del menú."""
         self.selected = 0
@@ -63,6 +73,16 @@ class DialogManager:
             self.active_dialogue = False
             self.dialogue_lines = []
             self.dialogue_index = 0
+
+    def show_message(self, message):
+        """Muestra un mensaje temporal de resultado."""
+        self.active_message = True
+        self.message_text = message
+
+    def close_message(self):
+        """Cierra el mensaje de resultado."""
+        self.active_message = False
+        self.message_text = ""
 
     def move_selection(self, direction):
         """Mueve la selección del menú."""
@@ -152,12 +172,7 @@ class DialogManager:
 
         font = pygame.font.Font(None, 30)
 
-        dialogue_rect = pygame.Rect(
-            120,
-            500,
-            1040,
-            150,
-        )
+        dialogue_rect = self.interaction_box
 
         pygame.draw.rect(
             screen,
@@ -213,5 +228,55 @@ class DialogManager:
             (
                 dialogue_rect.right - 250,
                 dialogue_rect.bottom - 35,
+            ),
+        )
+
+    def draw_message(self, screen):
+        """Dibuja un mensaje de resultado."""
+        if not self.active_message:
+            return
+
+        font = pygame.font.Font(None, 30)
+
+        message_rect = self.interaction_box
+
+        pygame.draw.rect(
+            screen,
+            (20, 20, 20),
+            message_rect,
+        )
+
+        pygame.draw.rect(
+            screen,
+            (255, 255, 255),
+            message_rect,
+            2,
+        )
+
+        message = font.render(
+            self.message_text,
+            True,
+            (255, 255, 255),
+        )
+
+        screen.blit(
+            message,
+            (
+                message_rect.x + 25,
+                message_rect.y + 35,
+            ),
+        )
+
+        continue_text = font.render(
+            "ENTER para continuar",
+            True,
+            (180, 180, 180),
+        )
+
+        screen.blit(
+            continue_text,
+            (
+                message_rect.right - 250,
+                message_rect.bottom - 35,
             ),
         )
