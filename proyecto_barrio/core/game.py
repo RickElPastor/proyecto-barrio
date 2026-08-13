@@ -16,6 +16,8 @@ from proyecto_barrio.world.map import GameMap
 from proyecto_barrio.world.collision import CollisionManager
 from proyecto_barrio.ui.dialogs import DialogManager
 from proyecto_barrio.interaction.actions import ActionManager
+from proyecto_barrio.interaction.manager import InteractionManager
+from proyecto_barrio.interaction.state import InteractionState
 
 
 class Game:
@@ -50,12 +52,9 @@ class Game:
 
         self.npcs = self.game_map.get_npcs()
 
-        self.interaction_open = False
-        self.interaction_npc = None
-
         self.dialog_manager = DialogManager()
-
         self.action_manager = ActionManager()
+        self.interaction_manager = InteractionManager()
 
         self.collision_manager = CollisionManager(
             self.game_map.get_collision_obstacles()
@@ -81,15 +80,13 @@ class Game:
             if self.dialog_manager.active_message:
                 if event.key == pygame.K_RETURN:
                     self.dialog_manager.close_message()
-
-                    self.interaction_open = True
                     self.dialog_manager.reset()
+                    self.interaction_manager.set_state(InteractionState.MENU)
 
                 elif event.key == pygame.K_ESCAPE:
                     self.dialog_manager.close_message()
-
-                    self.interaction_open = True
                     self.dialog_manager.reset()
+                    self.interaction_manager.set_state(InteractionState.MENU)
 
                 continue
 
@@ -98,23 +95,25 @@ class Game:
                     self.dialog_manager.advance_dialogue()
 
                 if not self.dialog_manager.active_dialogue:
-                    self.interaction_open = True
                     self.dialog_manager.reset()
+
+                    self.interaction_manager.set_state(InteractionState.MENU)
 
                 elif event.key == pygame.K_ESCAPE:
                     self.dialog_manager.active_dialogue = False
                     self.dialog_manager.dialogue_lines = []
                     self.dialog_manager.dialogue_index = 0
 
-                    self.interaction_open = True
                     self.dialog_manager.reset()
+
+                    self.interaction_manager.set_state(InteractionState.MENU)
 
                 continue
 
             # =========================
             # MENÚ DE INTERACCIÓN
             # =========================
-            if self.interaction_open:
+            if self.interaction_manager.state == InteractionState.MENU:
                 if event.key in (pygame.K_UP, pygame.K_w):
                     self.dialog_manager.move_selection(-1)
 
@@ -122,9 +121,9 @@ class Game:
                     self.dialog_manager.move_selection(1)
 
                 elif event.key == pygame.K_ESCAPE:
-                    self.interaction_open = False
-                    self.interaction_npc = None
                     self.dialog_manager.reset()
+                    self.interaction_manager.close()
+                    continue
 
                 elif event.key == pygame.K_RETURN:
                     action = self.dialog_manager.get_selected_action()
@@ -135,20 +134,17 @@ class Game:
                     )
 
                     if action["id"] == "talk":
-                        self.interaction_open = False
-
-                        self.dialog_manager.start_dialogue(self.interaction_npc)
+                        self.dialog_manager.start_dialogue(self.interaction_manager.npc)
+                        self.interaction_manager.set_state(InteractionState.DIALOGUE)
 
                     if action["id"] == "help":
-                        self.interaction_open = False
-
                         if result is not None:
                             self.dialog_manager.show_message(result["message"])
+                            self.interaction_manager.set_state(InteractionState.MESSAGE)
 
                     elif action["id"] == "cancel":
-                        self.interaction_open = False
-                        self.interaction_npc = None
                         self.dialog_manager.reset()
+                        self.interaction_manager.close()
 
                 continue
 
@@ -159,15 +155,14 @@ class Game:
                 nearby_npc = self.player.get_nearby_npc(self.npcs)
 
                 if nearby_npc is not None:
-                    self.interaction_open = True
-                    self.interaction_npc = nearby_npc
                     self.dialog_manager.reset()
+                    self.interaction_manager.open_menu(nearby_npc)
 
     def update(self, delta_time):
         """Actualiza la lógica del juego."""
 
         interaction_active = (
-            self.interaction_open
+            self.interaction_manager.active
             or self.dialog_manager.active_dialogue
             or self.dialog_manager.active_message
         )
@@ -192,16 +187,19 @@ class Game:
         if nearby_npc is not None:
             nearby_npc.draw_interaction_indicator(self.screen)
 
-        if self.interaction_open and self.interaction_npc is not None:
+        if (
+            self.interaction_manager.state == InteractionState.MENU
+            and self.interaction_manager.npc is not None
+        ):
             self.dialog_manager.draw(
                 self.screen,
-                self.interaction_npc,
+                self.interaction_manager.npc,
             )
 
         if self.dialog_manager.active_dialogue:
             self.dialog_manager.draw_dialogue(
                 self.screen,
-                self.interaction_npc,
+                self.interaction_manager.npc,
             )
 
         if self.dialog_manager.active_message:
