@@ -4,60 +4,55 @@
 class ActionManager:
     """Gestiona las acciones disponibles durante una interacción."""
 
-    def execute(self, action, game):
+    def execute(self, action, npc):
         """Ejecuta una acción y devuelve su resultado."""
 
         action_id = action["id"]
 
         if action_id == "talk":
-            return self._talk(game)
+            return self._talk(npc)
 
         if action_id == "help":
-            return self._help(game)
+            return self._help(npc)
 
         if action_id == "steal":
-            return self._steal(game)
+            return self._steal(npc)
 
         if action_id == "attack":
-            return self._attack(game)
+            return self._attack(npc)
 
         if action_id == "cancel":
-            return self._cancel(game)
+            return self._cancel(npc)
 
         return None
 
-    def _talk(self, game):
+    def _talk(self, npc):
         """Inicia una conversación."""
         return {
             "action": "talk",
-            "returns_to_menu": True,
         }
 
-    def _help(self, game):
+    def _help(self, npc):
         """Ejecuta temporalmente la acción de ayudar."""
         return {
             "action": "help",
-            "returns_to_menu": True,
-            "message": f"{game.interaction_manager.npc.name} te agradece la ayuda.",
+            "message": f"{npc.name} te agradece la ayuda.",
         }
 
-    def _steal(self, game):
+    def _steal(self, npc):
         """Ejecuta temporalmente la acción de robar."""
         return {
             "action": "steal",
-            "returns_to_menu": False,
         }
 
-    def _attack(self, game):
+    def _attack(self, npc):
         """Ejecuta temporalmente la acción de pegar."""
         return {
             "action": "attack",
-            "returns_to_menu": False,
         }
 
-    def _cancel(self, game):
+    def _cancel(self, npc):
         """Cancela la interacción."""
         return {
             "action": "cancel",
-            "returns_to_menu": False,
         }
